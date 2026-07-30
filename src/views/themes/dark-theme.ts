@@ -6,28 +6,30 @@ import {Theme} from './theme'
 // colors are theme specific, and we want all color values to come from the
 // active theme.
 enum Colors {
-  LIGHTER_GRAY = '#D0D0D0',
-  LIGHT_GRAY = '#BDBDBD',
-  GRAY = '#666666',
-  DARK_GRAY = '#222222',
-  DARKER_GRAY = '#0C0C0C',
-  OFF_BLACK = '#060606',
-  BLACK = '#000000',
-  BLUE = '#00769B',
+  LIGHTER_GRAY = '#E0E0E0',
+  LIGHT_GRAY = '#CCCCCC',
+  GRAY = '#858585',
+  DARK_GRAY = '#252526',
+  DARKER_GRAY = '#1E1E1E',
+  OFF_BLACK = '#181818',
+  BLACK = '#141414',
+  VTUNE_ORANGE = '#E67E22',
+  VTUNE_DARK_ORANGE = '#D35400',
+  BLUE = '#007ACC',
   PALE_BLUE = '#004E75',
-  GREEN = '#0F8A42',
+  GREEN = '#2ECC71',
   LIGHT_BROWN = '#D6AE24',
   BROWN = '#A66F1C',
 }
 
-const C_0 = 0.2
-const C_d = 0.1
-const L_0 = 0.2
-const L_d = 0.1
+const C_0 = 0.25
+const C_d = 0.15
+const L_0 = 0.35
+const L_d = 0.15
 
 const colorForBucket = (t: number) => {
   const x = triangle(30.0 * t)
-  const H = 360.0 * (0.9 * t)
+  const H = 360.0 * (0.95 * t)
   const C = C_0 + C_d * x
   const L = L_0 - L_d * x
   return Color.fromLumaChromaHue(L, C, H)
@@ -35,9 +37,9 @@ const colorForBucket = (t: number) => {
 const colorForBucketGLSL = `
   vec3 colorForBucket(float t) {
     float x = triangle(30.0 * t);
-    float H = 360.0 * (0.9 * t);
-    float C = ${C_0.toFixed(1)} + ${C_d.toFixed(1)} * x;
-    float L = ${L_0.toFixed(1)} - ${L_d.toFixed(1)} * x;
+    float H = 360.0 * (0.95 * t);
+    float C = ${C_0.toFixed(2)} + ${C_d.toFixed(2)} * x;
+    float L = ${L_0.toFixed(2)} - ${L_d.toFixed(2)} * x;
     return hcl2rgb(H, C, L);
   }
 `
@@ -53,16 +55,16 @@ export const darkTheme: Theme = {
   altFgSecondaryColor: Colors.GRAY,
 
   altBgPrimaryColor: Colors.BLACK,
-  altBgSecondaryColor: Colors.DARKER_GRAY,
+  altBgSecondaryColor: Colors.DARK_GRAY,
 
-  selectionPrimaryColor: Colors.BLUE,
-  selectionSecondaryColor: Colors.PALE_BLUE,
+  selectionPrimaryColor: Colors.VTUNE_ORANGE,
+  selectionSecondaryColor: Colors.VTUNE_DARK_ORANGE,
 
   weightColor: Colors.GREEN,
 
   searchMatchTextColor: Colors.DARKER_GRAY,
-  searchMatchPrimaryColor: Colors.BROWN,
-  searchMatchSecondaryColor: Colors.LIGHT_BROWN,
+  searchMatchPrimaryColor: Colors.VTUNE_ORANGE,
+  searchMatchSecondaryColor: Colors.VTUNE_DARK_ORANGE,
 
   colorForBucket,
   colorForBucketGLSL,

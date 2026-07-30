@@ -7,6 +7,9 @@ import {Vec2} from '../lib/math'
 // True if recursion should be flattened when viewing flamegraphs
 export const flattenRecursionAtom = new Atom<boolean>(false, 'flattenRecursion')
 
+// True if Numba framework frames should be filtered out
+export const filterNumbaInternalsAtom = new Atom<boolean>(true, 'filterNumbaInternals')
+
 // The query used in top-level views
 //
 // An empty string indicates that the search is open by no filter is applied.

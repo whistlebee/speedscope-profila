@@ -401,6 +401,53 @@ export class Profile {
     return ret
   }
 
+  getProfileWithNumbaFrameworkFiltered(): Profile {
+    const builder = new StackListProfileBuilder()
+    const internalKeywords = [
+      'compiler.py',
+      'typeinfer.py',
+      'lowering.py',
+      'codegen.py',
+      'dispatcher.py',
+      'serialize.py',
+      'ffi.py',
+      'site-packages/numba/',
+      'numba/core/',
+      'numba/np/',
+      '[Numba JIT Overhead',
+      '[bad_sample]',
+      'threading.py',
+    ]
+
+    function isNumbaInternal(frame: Frame): boolean {
+      const name = frame.name || ''
+      const file = frame.file || ''
+      return internalKeywords.some(kw => name.includes(kw) || file.includes(kw))
+    }
+
+    for (let i = 0; i < this.samples.length; i++) {
+      const leafNode = this.samples[i]
+      const weight = this.weights[i]
+      const stack: FrameInfo[] = []
+
+      for (let n: CallTreeNode | null = leafNode; n != null && n.frame !== Frame.root; n = n.parent) {
+        if (!isNumbaInternal(n.frame)) {
+          stack.push(n.frame)
+        }
+      }
+
+      if (stack.length > 0) {
+        stack.reverse()
+        builder.appendSampleWithWeight(stack, weight)
+      }
+    }
+
+    const ret = builder.build()
+    ret.name = this.name
+    ret.valueFormatter = this.valueFormatter
+    return ret
+  }
+
   // Demangle symbols for readability
   async demangle() {
     let demangle: ((name: string) => string) | null = null

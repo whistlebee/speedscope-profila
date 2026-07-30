@@ -1,6 +1,6 @@
 import {Profile} from '../lib/profile'
 import {getProfileToView} from './getters'
-import {flattenRecursionAtom, profileGroupAtom} from '.'
+import {flattenRecursionAtom, filterNumbaInternalsAtom, profileGroupAtom} from '.'
 import {FlamechartViewState, SandwichViewState} from './profile-group'
 import {useAtom} from '../lib/atom'
 
@@ -16,6 +16,7 @@ export interface ActiveProfileState {
 
 export function useActiveProfileState(): ActiveProfileState | null {
   const flattenRecursion = useAtom(flattenRecursionAtom)
+  const filterNumbaInternals = useAtom(filterNumbaInternalsAtom)
   const profileGroupState = useAtom(profileGroupAtom)
 
   if (!profileGroupState) return null
@@ -28,6 +29,7 @@ export function useActiveProfileState(): ActiveProfileState | null {
     profile: getProfileToView({
       profile: profileState.profile,
       flattenRecursion,
+      filterNumbaInternals,
     }),
     index: profileGroupState.indexToView,
   }

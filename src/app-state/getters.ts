@@ -44,8 +44,23 @@ export const getRowAtlas = memoizeByReference((canvasContext: CanvasContext) => 
 })
 
 export const getProfileToView = memoizeByShallowEquality(
-  ({profile, flattenRecursion}: {profile: Profile; flattenRecursion: boolean}): Profile => {
-    return flattenRecursion ? profile.getProfileWithRecursionFlattened() : profile
+  ({
+    profile,
+    flattenRecursion,
+    filterNumbaInternals,
+  }: {
+    profile: Profile
+    flattenRecursion: boolean
+    filterNumbaInternals: boolean
+  }): Profile => {
+    let result = profile
+    if (filterNumbaInternals) {
+      result = result.getProfileWithNumbaFrameworkFiltered()
+    }
+    if (flattenRecursion) {
+      result = result.getProfileWithRecursionFlattened()
+    }
+    return result
   },
 )
 export const getFrameToColorBucket = memoizeByReference(

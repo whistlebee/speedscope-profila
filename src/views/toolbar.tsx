@@ -11,6 +11,7 @@ import {ViewMode} from '../lib/view-mode'
 import {viewModeAtom} from '../app-state'
 import {ProfileGroupState} from '../app-state/profile-group'
 import {colorSchemeAtom} from '../app-state/color-scheme'
+import {filterNumbaInternalsAtom} from '../app-state'
 import {useAtom} from '../lib/atom'
 
 interface ToolbarProps extends ApplicationProps {
@@ -27,8 +28,14 @@ function ToolbarLeftContent(props: ToolbarProps) {
   const setChronoFlameChart = useSetViewMode(viewModeAtom.set, ViewMode.CHRONO_FLAME_CHART)
   const setLeftHeavyFlameGraph = useSetViewMode(viewModeAtom.set, ViewMode.LEFT_HEAVY_FLAME_GRAPH)
   const setSandwichView = useSetViewMode(viewModeAtom.set, ViewMode.SANDWICH_VIEW)
+  const setLLVMView = useSetViewMode(viewModeAtom.set, ViewMode.LLVM_IR_VIEW)
+  const filterNumbaInternals = useAtom(filterNumbaInternalsAtom)
 
   if (!props.activeProfileState) return null
+
+  const toggleNumbaFilter = () => {
+    filterNumbaInternalsAtom.set(!filterNumbaInternals)
+  }
 
   return (
     <div className={css(style.toolbarLeft)}>
@@ -57,7 +64,30 @@ function ToolbarLeftContent(props: ToolbarProps) {
         )}
         onClick={setSandwichView}
       >
-        <span className={css(style.emoji)}>🥪</span>Sandwich
+        <span className={css(style.emoji)}>🥪</span>Bottom-Up / Sandwich
+      </div>
+      <div
+        className={css(
+          style.toolbarTab,
+          props.viewMode === ViewMode.LLVM_IR_VIEW && style.toolbarTabActive,
+        )}
+        onClick={setLLVMView}
+      >
+        <span className={css(style.emoji)}>⚙️</span>LLVM IR / SIMD
+      </div>
+      <div
+        className={css(
+          style.toolbarTab,
+          filterNumbaInternals && style.toolbarTabActive,
+        )}
+        onClick={toggleNumbaFilter}
+        title="Hide Numba compiler/dispatcher framework frames to focus on user code"
+      >
+        <span className={css(style.emoji)}>🎯</span>
+        {filterNumbaInternals ? 'User Numba Code Only' : 'Show All Framework Frames'}
+      </div>
+      <div className={css(style.toolbarTab, style.numbaBadge)}>
+        ⚡ Numba @njit
       </div>
     </div>
   )
@@ -130,12 +160,12 @@ function ToolbarCenterContent(props: ToolbarProps): JSX.Element {
 
   if (activeProfileState && profileGroup && profiles) {
     if (profileGroup.profiles.length === 1) {
-      return <Fragment>{activeProfileState.profile.getName()}</Fragment>
+      return <Fragment>⚡ Profila VTune Edition | {activeProfileState.profile.getName()}</Fragment>
     } else {
       return (
         <div className={css(style.toolbarCenter)} onMouseLeave={closeProfileSelect}>
           <span onMouseOver={openProfileSelect}>
-            {activeProfileState.profile.getName()}{' '}
+            ⚡ Profila VTune Edition | {activeProfileState.profile.getName()}{' '}
             <span className={css(style.toolbarProfileIndex)}>
               ({activeProfileState.index + 1}/{profileGroup.profiles.length})
             </span>
@@ -153,7 +183,7 @@ function ToolbarCenterContent(props: ToolbarProps): JSX.Element {
       )
     }
   }
-  return <Fragment>{'🔬speedscope'}</Fragment>
+  return <Fragment>{'⚡ Profila VTune Profiler'}</Fragment>
 }
 
 function ToolbarRightContent(props: ToolbarProps) {
@@ -275,6 +305,12 @@ const getStyle = withTheme(theme =>
       display: 'inline-block',
       textAlign: 'center',
       minWidth: '50px',
+    },
+    numbaBadge: {
+      background: 'rgb(46, 204, 113, 0.2)',
+      color: '#2ecc71',
+      border: '1px solid #2ecc71',
+      fontWeight: 'bold',
     },
     emoji: {
       display: 'inline-block',
