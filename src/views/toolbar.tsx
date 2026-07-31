@@ -35,17 +35,15 @@ function useSetViewMode(setViewMode: (viewMode: ViewMode) => void, viewMode: Vie
 
 function ToolbarLeftContent(props: ToolbarProps) {
   const style = getStyle(useTheme())
-  const setChronoFlameChart = useSetViewMode(viewModeAtom.set, ViewMode.CHRONO_FLAME_CHART)
-  const setLeftHeavyFlameGraph = useSetViewMode(viewModeAtom.set, ViewMode.LEFT_HEAVY_FLAME_GRAPH)
-  const setSandwichView = useSetViewMode(viewModeAtom.set, ViewMode.SANDWICH_VIEW)
-  const setLLVMView = useSetViewMode(viewModeAtom.set, ViewMode.LLVM_IR_VIEW)
   const filterNumbaInternals = useAtom(filterNumbaInternalsAtom)
 
   if (!props.activeProfileState) return null
 
-  const toggleNumbaFilter = () => {
-    filterNumbaInternalsAtom.set(!filterNumbaInternals)
-  }
+  const setChronoFlameChart = () => viewModeAtom.set(ViewMode.CHRONO_FLAME_CHART)
+  const setLeftHeavyFlameGraph = () => viewModeAtom.set(ViewMode.LEFT_HEAVY_FLAME_GRAPH)
+  const setSandwichView = () => viewModeAtom.set(ViewMode.SANDWICH_VIEW)
+  const setLLVMView = () => viewModeAtom.set(ViewMode.LLVM_IR_VIEW)
+  const toggleNumbaFilter = () => filterNumbaInternalsAtom.set(!filterNumbaInternals)
 
   return (
     <div className={css(style.toolbarLeft)}>
