@@ -21,6 +21,9 @@ import {HashParams} from '../lib/hash-params'
 import {StatelessComponent} from '../lib/preact-helpers'
 import {SandwichViewContainer} from './sandwich-view'
 import {LLVMView} from './llvm-view'
+import {LLVMSideDrawer} from './llvm-side-drawer'
+import {FlamechartID} from '../app-state/profile-group'
+import {Frame} from '../lib/profile'
 
 const importModule = import('../import')
 
@@ -590,8 +593,28 @@ export class Application extends StatelessComponent<ApplicationProps> {
     }
   }
 
+  onCloseDrawer = () => {
+    profileGroupAtom.setSelectedNode(FlamechartID.CHRONO, null)
+    profileGroupAtom.setSelectedNode(FlamechartID.LEFT_HEAVY, null)
+    profileGroupAtom.setSelectedFrame(null)
+  }
+
   render() {
     const style = this.getStyle()
+    const activeProfileState = this.props.activeProfileState
+    const viewMode = this.props.viewMode
+
+    let selectedFrame: Frame | null = null
+    if (activeProfileState && viewMode !== ViewMode.LLVM_IR_VIEW) {
+      if (viewMode === ViewMode.CHRONO_FLAME_CHART) {
+        selectedFrame = activeProfileState.chronoViewState.selectedNode?.frame || null
+      } else if (viewMode === ViewMode.LEFT_HEAVY_FLAME_GRAPH) {
+        selectedFrame = activeProfileState.leftHeavyViewState.selectedNode?.frame || null
+      } else if (viewMode === ViewMode.SANDWICH_VIEW) {
+        selectedFrame = activeProfileState.sandwichViewState.callerCallee?.selectedFrame || null
+      }
+    }
+
     return (
       <div
         onDrop={this.onDrop}
@@ -627,7 +650,12 @@ export class Application extends StatelessComponent<ApplicationProps> {
             <div>📦 <b>Memory Allocations:</b> <span style={{color: '#f1c40f', fontWeight: 'bold'}}>Tracked per line</span></div>
           </div>
         )}
-        <div className={css(style.contentContainer)}>{this.renderContent()}</div>
+        <div className={css(style.contentContainer)}>
+          {this.renderContent()}
+          {selectedFrame && !selectedFrame.name.includes('[bad_sample]') && (
+            <LLVMSideDrawer selectedFrame={selectedFrame} onClose={this.onCloseDrawer} />
+          )}
+        </div>
         {this.props.dragActive && <div className={css(style.dragTarget)} />}
       </div>
     )
