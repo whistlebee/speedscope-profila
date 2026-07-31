@@ -86,9 +86,6 @@ function ToolbarLeftContent(props: ToolbarProps) {
         <span className={css(style.emoji)}>🎯</span>
         {filterNumbaInternals ? 'User Numba Code Only' : 'Show All Framework Frames'}
       </div>
-      <div className={css(style.toolbarTab, style.numbaBadge)}>
-        ⚡ Numba @njit
-      </div>
     </div>
   )
 }
