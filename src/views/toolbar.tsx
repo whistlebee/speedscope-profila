@@ -293,8 +293,16 @@ const getStyle = withTheme(theme =>
       marginTop: Sizes.SEPARATOR_HEIGHT,
       height: Sizes.TOOLBAR_TAB_HEIGHT,
       lineHeight: `${Sizes.TOOLBAR_TAB_HEIGHT}px`,
-      paddingLeft: 2,
-      paddingRight: 4,
+      paddingLeft: 8,
+      paddingRight: 10,
+      display: 'inline-block',
+      marginLeft: 2,
+      cursor: 'pointer',
+      borderRadius: 3,
+      transition: `all ${Duration.HOVER_CHANGE} ease-in`,
+      ':hover': {
+        background: theme.selectionSecondaryColor,
+      },
     },
     iconWrapper: {
       paddingRight: 6,
