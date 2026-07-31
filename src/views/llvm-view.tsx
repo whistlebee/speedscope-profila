@@ -4,6 +4,7 @@ import {StyleSheet, css} from 'aphrodite'
 import {ActiveProfileState} from '../app-state/active-profile-state'
 import {useTheme, withTheme} from './themes/theme'
 import {FontFamily, FontSize} from './style'
+import {GearIcon, RocketIcon, BoxIcon, ZapIcon, FolderIcon} from './icons'
 
 interface LLVMViewProps {
   activeProfileState: ActiveProfileState
@@ -340,8 +341,8 @@ exit:
               onClick={() => setSelectedFrame(f)}
             >
               <div className={css(style.frameName)}>{f.name}</div>
-              <div className={css(style.frameSub)}>
-                {status.enabled ? '🚀 SIMD Vectorized' : '🐢 Scalar Execution'}
+              <div className={css(style.frameSub)} style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                {status.enabled ? <><RocketIcon size={12} color="#2ecc71" /> SIMD Vectorized</> : <><GearIcon size={12} color="#e67e22" /> Scalar Execution</>}
               </div>
             </div>
           )
@@ -352,9 +353,9 @@ exit:
         {selectedFrame ? (
           <div>
             <div className={css(style.header)}>
-              <h2>⚙️ Function: {selectedFrame.name}</h2>
-              <div className={css(style.filePath)}>
-                {selectedFrame.file}:{selectedFrame.line}
+              <h2 style={{display: 'flex', alignItems: 'center', gap: '8px'}}><GearIcon size={20} color="#e67e22" /> Function: {selectedFrame.name}</h2>
+              <div className={css(style.filePath)} style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+                <FolderIcon size={12} color="#888" /> {selectedFrame.file}:{selectedFrame.line}
               </div>
             </div>
 
@@ -364,9 +365,9 @@ exit:
                 <div className={css(style.statusBox, status.enabled ? style.statusEnabled : style.statusDisabled)}>
                   <div className={css(style.statusText)}>{status.text}</div>
                   <div className={css(style.metricsRow)}>
-                    <div>📊 Total LLVM Instructions: <b>{status.instructions}</b></div>
-                    <div>🚀 SIMD Operations: <b>{status.simdOps}</b></div>
-                    <div>📦 Memory Allocations: <b>{status.memAlloc}</b></div>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}><GearIcon size={14} /> Total LLVM Instructions: <b>{status.instructions}</b></div>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}><RocketIcon size={14} /> SIMD Operations: <b>{status.simdOps}</b></div>
+                    <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}><BoxIcon size={14} /> Memory Allocations: <b>{status.memAlloc}</b></div>
                   </div>
                 </div>
               )

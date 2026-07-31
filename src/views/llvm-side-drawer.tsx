@@ -4,6 +4,7 @@ import {StyleSheet, css} from 'aphrodite'
 import {Frame} from '../lib/profile'
 import {useTheme, withTheme} from './themes/theme'
 import {FontFamily, FontSize} from './style'
+import {GearIcon, RocketIcon, FolderIcon, BoxIcon} from './icons'
 
 interface LLVMSideDrawerProps {
   selectedFrame: Frame
@@ -209,7 +210,9 @@ exit:
       onMouseDown={(e: any) => e.stopPropagation()}
     >
       <div className={css(style.drawerHeader)}>
-        <div className={css(style.drawerTitle)}>⚡ LLVM IR & SIMD Inspector</div>
+        <div className={css(style.drawerTitle)} style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+          <GearIcon size={16} color="#e67e22" /> LLVM IR & SIMD Inspector
+        </div>
         <button
           className={css(style.closeButton)}
           onClick={handleClose}
@@ -222,16 +225,16 @@ exit:
 
       <div className={css(style.funcName)}>{name}</div>
       {file && (
-        <div className={css(style.filePath)}>
-          📁 {file}:{line}
+        <div className={css(style.filePath)} style={{display: 'flex', alignItems: 'center', gap: '4px'}}>
+          <FolderIcon size={12} color="#888" /> {file}:{line}
         </div>
       )}
 
       <div className={css(style.statusBox, status.enabled ? style.statusEnabled : style.statusDisabled)}>
         <div className={css(style.statusText)}>{status.text}</div>
         <div className={css(style.metricsRow)}>
-          <div>📊 Instructions: <b>{status.instructions}</b></div>
-          <div>🚀 SIMD Ops: <b>{status.simdOps}</b></div>
+          <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}><GearIcon size={12} /> Instructions: <b>{status.instructions}</b></div>
+          <div style={{display: 'flex', alignItems: 'center', gap: '4px'}}><RocketIcon size={12} /> SIMD Ops: <b>{status.simdOps}</b></div>
         </div>
       </div>
 

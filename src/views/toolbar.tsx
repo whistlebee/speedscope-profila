@@ -13,6 +13,16 @@ import {ProfileGroupState} from '../app-state/profile-group'
 import {colorSchemeAtom} from '../app-state/color-scheme'
 import {filterNumbaInternalsAtom} from '../app-state'
 import {useAtom} from '../lib/atom'
+import {
+  ClockIcon,
+  FlameIcon,
+  LayersIcon,
+  GearIcon,
+  TargetIcon,
+  ExportIcon,
+  ImportIcon,
+  ZapIcon,
+} from './icons'
 
 interface ToolbarProps extends ApplicationProps {
   browseForFile(): void
@@ -46,7 +56,7 @@ function ToolbarLeftContent(props: ToolbarProps) {
         )}
         onClick={setChronoFlameChart}
       >
-        <span className={css(style.emoji)}>🕰</span>Time Order
+        <span className={css(style.iconWrapper)}><ClockIcon size={14} /></span>Time Order
       </div>
       <div
         className={css(
@@ -55,7 +65,7 @@ function ToolbarLeftContent(props: ToolbarProps) {
         )}
         onClick={setLeftHeavyFlameGraph}
       >
-        <span className={css(style.emoji)}>⬅️</span>Left Heavy
+        <span className={css(style.iconWrapper)}><FlameIcon size={14} /></span>Left Heavy
       </div>
       <div
         className={css(
@@ -64,7 +74,7 @@ function ToolbarLeftContent(props: ToolbarProps) {
         )}
         onClick={setSandwichView}
       >
-        <span className={css(style.emoji)}>🥪</span>Bottom-Up / Sandwich
+        <span className={css(style.iconWrapper)}><LayersIcon size={14} /></span>Bottom-Up / Sandwich
       </div>
       <div
         className={css(
@@ -73,7 +83,7 @@ function ToolbarLeftContent(props: ToolbarProps) {
         )}
         onClick={setLLVMView}
       >
-        <span className={css(style.emoji)}>⚙️</span>LLVM IR / SIMD
+        <span className={css(style.iconWrapper)}><GearIcon size={14} /></span>LLVM IR / SIMD
       </div>
       <div
         className={css(
@@ -83,7 +93,7 @@ function ToolbarLeftContent(props: ToolbarProps) {
         onClick={toggleNumbaFilter}
         title="Hide Numba compiler/dispatcher framework frames to focus on user code"
       >
-        <span className={css(style.emoji)}>🎯</span>
+        <span className={css(style.iconWrapper)}><TargetIcon size={14} /></span>
         {filterNumbaInternals ? 'User Numba Code Only' : 'Show All Framework Frames'}
       </div>
     </div>
@@ -189,12 +199,12 @@ function ToolbarRightContent(props: ToolbarProps) {
 
   const exportFile = (
     <div className={css(style.toolbarTab)} onClick={props.saveFile}>
-      <span className={css(style.emoji)}>⤴️</span>Export
+      <span className={css(style.iconWrapper)}><ExportIcon size={14} /></span>Export
     </div>
   )
   const importFile = (
     <div className={css(style.toolbarTab)} onClick={props.browseForFile}>
-      <span className={css(style.emoji)}>⤵️</span>Import
+      <span className={css(style.iconWrapper)}><ImportIcon size={14} /></span>Import
     </div>
   )
 
@@ -284,13 +294,13 @@ const getStyle = withTheme(theme =>
       height: Sizes.TOOLBAR_TAB_HEIGHT,
       lineHeight: `${Sizes.TOOLBAR_TAB_HEIGHT}px`,
       paddingLeft: 2,
-      paddingRight: 8,
-      display: 'inline-block',
-      marginLeft: 2,
-      transition: `all ${Duration.HOVER_CHANGE} ease-in`,
-      ':hover': {
-        background: theme.selectionSecondaryColor,
-      },
+      paddingRight: 4,
+    },
+    iconWrapper: {
+      paddingRight: 6,
+      display: 'inline-flex',
+      alignItems: 'center',
+      verticalAlign: 'middle',
     },
     toolbarTabActive: {
       background: theme.selectionPrimaryColor,

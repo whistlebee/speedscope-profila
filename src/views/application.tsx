@@ -24,6 +24,7 @@ import {LLVMView} from './llvm-view'
 import {LLVMSideDrawer} from './llvm-side-drawer'
 import {FlamechartID} from '../app-state/profile-group'
 import {Frame} from '../lib/profile'
+import {TargetIcon, GearIcon, RocketIcon, BoxIcon} from './icons'
 
 const importModule = import('../import')
 
@@ -656,10 +657,10 @@ export class Application extends StatelessComponent<ApplicationProps> {
             color: '#d4d4d4',
             fontFamily: FontFamily.MONOSPACE
           }}>
-            <div>🎯 <b>JIT Steady-State Execution:</b> <span style={{color: '#2ecc71', fontWeight: 'bold'}}>96.2%</span></div>
-            <div>⚙️ <b>JIT Compilation & Lowering:</b> <span style={{color: '#e67e22', fontWeight: 'bold'}}>3.8%</span></div>
-            <div>🚀 <b>LLVM SIMD Vectorization:</b> <span style={{color: '#38bdf8', fontWeight: 'bold'}}>ENABLED (25 SIMD ops across 9 vector loops)</span></div>
-            <div>📦 <b>Memory Allocations:</b> <span style={{color: '#f1c40f', fontWeight: 'bold'}}>Tracked per line</span></div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}><TargetIcon size={14} color="#2ecc71" /> <b>JIT Steady-State Execution:</b> <span style={{color: '#2ecc71', fontWeight: 'bold'}}>96.2%</span></div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}><GearIcon size={14} color="#e67e22" /> <b>JIT Compilation & Lowering:</b> <span style={{color: '#e67e22', fontWeight: 'bold'}}>3.8%</span></div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}><RocketIcon size={14} color="#38bdf8" /> <b>LLVM SIMD Vectorization:</b> <span style={{color: '#38bdf8', fontWeight: 'bold'}}>ENABLED (25 SIMD ops across 9 vector loops)</span></div>
+            <div style={{display: 'flex', alignItems: 'center', gap: '6px'}}><BoxIcon size={14} color="#f1c40f" /> <b>Memory Allocations:</b> <span style={{color: '#f1c40f', fontWeight: 'bold'}}>Tracked per line</span></div>
           </div>
         )}
         <div className={css(style.contentContainer)}>
