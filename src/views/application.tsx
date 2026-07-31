@@ -594,13 +594,14 @@ export class Application extends StatelessComponent<ApplicationProps> {
   }
 
   onCloseDrawer = () => {
+    const currentFrame = this.getSelectedFrame()
+    this.setState({isDrawerClosed: true, closedForFrame: currentFrame})
     const pg = profileGroupAtom.get()
     if (pg) {
       pg.setSelectedNode(FlamechartID.CHRONO, null)
       pg.setSelectedNode(FlamechartID.LEFT_HEAVY, null)
       pg.setSelectedFrame(null)
     }
-    this.setState({dismissedFrame: this.getSelectedFrame()})
   }
 
   getSelectedFrame(): Frame | null {
@@ -621,8 +622,10 @@ export class Application extends StatelessComponent<ApplicationProps> {
   render() {
     const style = this.getStyle()
     const currentSelectedFrame = this.getSelectedFrame()
-    const selectedFrame =
-      currentSelectedFrame !== (this.state as any)?.dismissedFrame ? currentSelectedFrame : null
+    const isClosed =
+      (this.state as any)?.isDrawerClosed &&
+      (this.state as any)?.closedForFrame === currentSelectedFrame
+    const selectedFrame = isClosed ? null : currentSelectedFrame
 
     return (
       <div

@@ -194,11 +194,28 @@ exit:
     ? irLines.filter(l => l.toLowerCase().includes(codeQuery.toLowerCase())).length
     : 0
 
+  const handleClose = (e: any) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    onClose()
+  }
+
   return (
-    <div className={css(style.drawerContainer)}>
+    <div
+      className={css(style.drawerContainer)}
+      onClick={(e: any) => e.stopPropagation()}
+      onMouseDown={(e: any) => e.stopPropagation()}
+    >
       <div className={css(style.drawerHeader)}>
         <div className={css(style.drawerTitle)}>⚡ LLVM IR & SIMD Inspector</div>
-        <button className={css(style.closeButton)} onClick={onClose} title="Close Side Panel">
+        <button
+          className={css(style.closeButton)}
+          onClick={handleClose}
+          onMouseDown={handleClose}
+          title="Close Side Panel"
+        >
           ✖
         </button>
       </div>
