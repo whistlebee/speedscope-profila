@@ -594,26 +594,35 @@ export class Application extends StatelessComponent<ApplicationProps> {
   }
 
   onCloseDrawer = () => {
-    profileGroupAtom.setSelectedNode(FlamechartID.CHRONO, null)
-    profileGroupAtom.setSelectedNode(FlamechartID.LEFT_HEAVY, null)
-    profileGroupAtom.setSelectedFrame(null)
+    const pg = profileGroupAtom.get()
+    if (pg) {
+      pg.setSelectedNode(FlamechartID.CHRONO, null)
+      pg.setSelectedNode(FlamechartID.LEFT_HEAVY, null)
+      pg.setSelectedFrame(null)
+    }
+    this.setState({dismissedFrame: this.getSelectedFrame()})
+  }
+
+  getSelectedFrame(): Frame | null {
+    const activeProfileState = this.props.activeProfileState
+    const viewMode = this.props.viewMode
+    if (!activeProfileState || viewMode === ViewMode.LLVM_IR_VIEW) return null
+
+    if (viewMode === ViewMode.CHRONO_FLAME_CHART) {
+      return activeProfileState.chronoViewState.selectedNode?.frame || null
+    } else if (viewMode === ViewMode.LEFT_HEAVY_FLAME_GRAPH) {
+      return activeProfileState.leftHeavyViewState.selectedNode?.frame || null
+    } else if (viewMode === ViewMode.SANDWICH_VIEW) {
+      return activeProfileState.sandwichViewState.callerCallee?.selectedFrame || null
+    }
+    return null
   }
 
   render() {
     const style = this.getStyle()
-    const activeProfileState = this.props.activeProfileState
-    const viewMode = this.props.viewMode
-
-    let selectedFrame: Frame | null = null
-    if (activeProfileState && viewMode !== ViewMode.LLVM_IR_VIEW) {
-      if (viewMode === ViewMode.CHRONO_FLAME_CHART) {
-        selectedFrame = activeProfileState.chronoViewState.selectedNode?.frame || null
-      } else if (viewMode === ViewMode.LEFT_HEAVY_FLAME_GRAPH) {
-        selectedFrame = activeProfileState.leftHeavyViewState.selectedNode?.frame || null
-      } else if (viewMode === ViewMode.SANDWICH_VIEW) {
-        selectedFrame = activeProfileState.sandwichViewState.callerCallee?.selectedFrame || null
-      }
-    }
+    const currentSelectedFrame = this.getSelectedFrame()
+    const selectedFrame =
+      currentSelectedFrame !== (this.state as any)?.dismissedFrame ? currentSelectedFrame : null
 
     return (
       <div
