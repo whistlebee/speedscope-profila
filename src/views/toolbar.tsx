@@ -165,12 +165,12 @@ function ToolbarCenterContent(props: ToolbarProps): JSX.Element {
 
   if (activeProfileState && profileGroup && profiles) {
     if (profileGroup.profiles.length === 1) {
-      return <Fragment>⚡ Profila VTune Edition | {activeProfileState.profile.getName()}</Fragment>
+      return <Fragment>⚡ Profila | {activeProfileState.profile.getName()}</Fragment>
     } else {
       return (
         <div className={css(style.toolbarCenter)} onMouseLeave={closeProfileSelect}>
           <span onMouseOver={openProfileSelect}>
-            ⚡ Profila VTune Edition | {activeProfileState.profile.getName()}{' '}
+            ⚡ Profila | {activeProfileState.profile.getName()}{' '}
             <span className={css(style.toolbarProfileIndex)}>
               ({activeProfileState.index + 1}/{profileGroup.profiles.length})
             </span>
@@ -188,7 +188,7 @@ function ToolbarCenterContent(props: ToolbarProps): JSX.Element {
       )
     }
   }
-  return <Fragment>{'⚡ Profila VTune Profiler'}</Fragment>
+  return <Fragment>{'⚡ Profila Profiler'}</Fragment>
 }
 
 function ToolbarRightContent(props: ToolbarProps) {

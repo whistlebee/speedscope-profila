@@ -156,11 +156,19 @@ function importSpeedscopeProfile(
 }
 
 export function importSpeedscopeProfiles(serialized: FileFormat.File): ProfileGroup {
-  return {
+  (window as any).gRawProfile = serialized
+  const profiles = serialized.profiles.map(p => {
+    const prof = importSpeedscopeProfile(p, serialized.shared.frames)
+    ;(prof as any).rawProfile = serialized
+    return prof
+  })
+  const group: any = {
     name: serialized.name || serialized.profiles[0].name || 'profile',
     indexToView: serialized.activeProfileIndex || 0,
-    profiles: serialized.profiles.map(p => importSpeedscopeProfile(p, serialized.shared.frames)),
+    profiles,
   }
+  group.rawProfile = serialized
+  return group
 }
 
 export function saveToFile(profileGroup: ProfileGroup): void {

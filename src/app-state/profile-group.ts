@@ -68,6 +68,10 @@ export class ProfileGroupAtom extends Atom<ProfileGroupState> {
   }
 
   setProfileGroup = (group: ProfileGroup) => {
+    const raw = (group as any).rawProfile || (group.profiles[0] as any)?.rawProfile
+    if (raw) {
+      (window as any).gRawProfile = raw
+    }
     this.set({
       name: group.name,
       indexToView: group.indexToView,

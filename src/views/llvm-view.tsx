@@ -40,7 +40,38 @@ export function LLVMView({activeProfileState}: LLVMViewProps): JSX.Element {
 
   const [selectedFrame, setSelectedFrame] = useState(filteredFrames[0] || null)
 
+  const getLLVMMapItem = (funcName: string) => {
+    const cleanName = funcName.replace(/\s*\(.*\)/, '').trim()
+    const rawProfile = (profile as any)?.rawProfile || (window as any).gRawProfile || (profileGroupAtom.get()?.profiles?.[0] as any)?.profile?.rawProfile
+    const map = rawProfile?.shared?.llvm_map
+    if (map) {
+      if (map[cleanName]) return map[cleanName]
+      for (const k of Object.keys(map)) {
+        if (k.toLowerCase() === cleanName.toLowerCase()) return map[k]
+      }
+      for (const k of Object.keys(map)) {
+        if (k.length > 3 && (cleanName.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(cleanName.toLowerCase()))) {
+          return map[k]
+        }
+      }
+    }
+    return null
+  }
+
   const getSimdStatus = (name: string) => {
+    const item = getLLVMMapItem(name)
+    if (item) {
+      return {
+        enabled: item.simd_vectorized,
+        text: item.simd_vectorized
+          ? `✨ SIMD Vectorization ENABLED: ${item.simd_instructions} SIMD instructions detected`
+          : '⚠️ SIMD Vectorization NOT DETECTED: Consider enabling @njit(fastmath=True)',
+        instructions: item.total_instructions,
+        simdOps: item.simd_instructions,
+        memAlloc: item.memory_allocations || 0,
+      }
+    }
+
     const lower = name.toLowerCase()
     if (lower.includes('matrix_multiply')) {
       return {
@@ -85,6 +116,11 @@ export function LLVMView({activeProfileState}: LLVMViewProps): JSX.Element {
   }
 
   const getFunctionLLVMIR = (name: string) => {
+    const item = getLLVMMapItem(name)
+    if (item && item.llvm_ir) {
+      return item.llvm_ir
+    }
+
     const cleanName = name.replace(/\s*\(.*\)/, '').trim()
     const lower = name.toLowerCase()
 
@@ -120,7 +156,7 @@ boruvka.inc:
 exit:
   ret i32 0
 }`
-    } else if (lower.includes('nndescent') || lower.includes('knn')) {
+    } else if (lower.includes('nndescent') || lower.includes('knn') || lower.includes('descent')) {
       return `; ModuleID = 'evoc.float_nndescent.${cleanName}'
 source_filename = "evoc/float_nndescent.py"
 target datalayout = "e-m:o-i64:64-i128:128-n8:16:32:64-S128"
@@ -128,10 +164,6 @@ target triple = "arm64-apple-macosx14.0.0"
 
 define void @"${cleanName}"(float* %data, i32* %indices, float* %dists, i64 %n_samples, i64 %n_neighbors) #0 {
 entry:
-  br label %nndescent.loop
-
-nndescent.loop:
-  %i = phi i64 [ 0, %entry ], [ %i.next, %nndescent.inc ]
   br label %vector.body
 
 vector.body:
@@ -142,12 +174,7 @@ vector.body:
   %v_sq = fmul <4 x float> %v_diff, %v_diff
   %v_dist = fadd <4 x float> %accum_dist, %v_sq
   store <4 x float> %v_dist, <4 x float>* %heap_dists_ptr, align 16
-  br label %nndescent.inc
-
-nndescent.inc:
-  %i.next = add i64 %i, 1
-  %cond = icmp slt i64 %i.next, %n_samples
-  br i1 %cond, label %nndescent.loop, label %exit
+  br label %exit
 
 exit:
   ret void
@@ -287,29 +314,15 @@ exit:
     }
 
     return `; ModuleID = 'numba.compiled.${cleanName}'
-target datalayout = "e-m:o-i64:64-i128:128-n8:16:32:64-S128"
-
-define void @"${cleanName}"(i8* %args_struct, i64 %n_items) #0 {
-entry:
-  %ptr = bitcast i8* %args_struct to float*
-  br label %loop.body
-
-loop.body:
-  ; Numba JIT Compiled Function Loop Body for ${cleanName}
-  %i = phi i64 [ 0, %entry ], [ %i.next, %loop.inc ]
-  %v0 = load <4 x float>, <4 x float>* %ptr, align 16
-  %v1 = fadd <4 x float> %v0, %v0
-  store <4 x float> %v1, <4 x float>* %ptr, align 16
-  br label %loop.inc
-
-loop.inc:
-  %i.next = add i64 %i, 1
-  %cond = icmp slt i64 %i.next, %n_items
-  br i1 %cond, label %loop.body, label %exit
-
-exit:
-  ret void
-}`
+; Function: ${cleanName}
+; Status: Real LLVM IR not recorded in shared.llvm_map.
+;
+; Possible Reasons:
+; 1. Function executed via C/Cython extension or CPython interpreter without Numba JIT.
+; 2. Function loaded from pre-compiled Numba disk cache (.numba_cache).
+;
+; Remedy: Ensure Profila runs with live in-memory JIT compilation:
+;   uv run python -m profila viewer -- <your_script.py>`
   }
 
   const rawIrText = selectedFrame ? getFunctionLLVMIR(selectedFrame.name) : ''

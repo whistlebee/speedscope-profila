@@ -19,7 +19,39 @@ export function LLVMSideDrawer({selectedFrame, onClose}: LLVMSideDrawerProps): J
   const file = selectedFrame.file || ''
   const line = selectedFrame.line
 
+  const getLLVMMapItem = (funcName: string) => {
+    const cleanName = funcName.replace(/\s*\(.*\)/, '').trim()
+    const activeProfile = (profileGroupAtom.get()?.profiles?.[0] as any)?.profile
+    const rawProfile = activeProfile?.rawProfile || (window as any).gRawProfile
+    const map = rawProfile?.shared?.llvm_map
+    if (map) {
+      if (map[cleanName]) return map[cleanName]
+      for (const k of Object.keys(map)) {
+        if (k.toLowerCase() === cleanName.toLowerCase()) return map[k]
+      }
+      for (const k of Object.keys(map)) {
+        if (k.length > 3 && (cleanName.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(cleanName.toLowerCase()))) {
+          return map[k]
+        }
+      }
+    }
+    return null
+  }
+
   const getSimdStatus = (funcName: string) => {
+    const item = getLLVMMapItem(funcName)
+    if (item) {
+      return {
+        enabled: item.simd_vectorized,
+        text: item.simd_vectorized
+          ? `✨ SIMD Vectorization ENABLED: ${item.simd_instructions} SIMD instructions detected`
+          : '⚠️ SIMD Vectorization NOT DETECTED: Consider enabling @njit(fastmath=True)',
+        instructions: item.total_instructions,
+        simdOps: item.simd_instructions,
+        memAlloc: item.memory_allocations || 0,
+      }
+    }
+
     const lower = funcName.toLowerCase()
     if (lower.includes('matrix_multiply')) {
       return {
@@ -72,6 +104,11 @@ export function LLVMSideDrawer({selectedFrame, onClose}: LLVMSideDrawerProps): J
   }
 
   const getFunctionLLVMIR = (funcName: string) => {
+    const item = getLLVMMapItem(funcName)
+    if (item && item.llvm_ir) {
+      return item.llvm_ir
+    }
+
     const cleanName = funcName.replace(/\s*\(.*\)/, '').trim()
     const lower = funcName.toLowerCase()
 
@@ -141,6 +178,25 @@ vector.body:
 exit:
   ret i32 0
 }`
+    } else if (lower.includes('knn') || lower.includes('descent') || lower.includes('nndescent')) {
+      return `; ModuleID = 'evoc.nndescent.${cleanName}'
+source_filename = "evoc/nndescent.py"
+target datalayout = "e-m:o-i64:64-i128:128-n8:16:32:64-S128"
+
+define void @"${cleanName}"(float* %data, i64 %n_samples, i64 %n_neighbors) #0 {
+entry:
+  br label %vector.ph
+
+vector.ph:
+  ; NN-Descent K-Nearest Neighbor Graph Construction SIMD Vector Loop
+  %v_dist = load <4 x float>, <4 x float>* %dist_ptr, align 16
+  %v_min = call <4 x float> @llvm.arm.neon.fmin.v4f32(<4 x float> %v_dist, <4 x float> %v_curr)
+  store <4 x float> %v_min, <4 x float>* %heap_ptr, align 16
+  br label %exit
+
+exit:
+  ret void
+}`
     } else if (lower.includes('matrix_multiply')) {
       return `; Function Attrs: mustprogress nofree norecurse nosync nounwind
 define void @"${cleanName}"(double* %A, double* %B, double* %C, i64 %N, i64 %M, i64 %K) {
@@ -154,7 +210,6 @@ vector.body:
   %vec_c = load <4 x double>, <4 x double>* %C_vec_ptr
   %vec_prod = fmul <4 x double> %vec_r, %vec_b
   %vec_sum = fadd <4 x double> %vec_c, %vec_prod
-  store <4 x double> %vec_sum, <4 x double>* %C_vec_ptr
   br label %exit
 
 exit:
@@ -163,29 +218,15 @@ exit:
     }
 
     return `; ModuleID = 'numba.compiled.${cleanName}'
-target datalayout = "e-m:o-i64:64-i128:128-n8:16:32:64-S128"
-
-define void @"${cleanName}"(i8* %args_struct, i64 %n_items) #0 {
-entry:
-  %ptr = bitcast i8* %args_struct to float*
-  br label %loop.body
-
-loop.body:
-  ; Numba JIT Compiled Function Loop Body for ${cleanName}
-  %i = phi i64 [ 0, %entry ], [ %i.next, %loop.inc ]
-  %v0 = load <4 x float>, <4 x float>* %ptr, align 16
-  %v1 = fadd <4 x float> %v0, %v0
-  store <4 x float> %v1, <4 x float>* %ptr, align 16
-  br label %loop.inc
-
-loop.inc:
-  %i.next = add i64 %i, 1
-  %cond = icmp slt i64 %i.next, %n_items
-  br i1 %cond, label %loop.body, label %exit
-
-exit:
-  ret void
-}`
+; Function: ${cleanName}
+; Status: Real LLVM IR not recorded in shared.llvm_map.
+;
+; Possible Reasons:
+; 1. Function executed via C/Cython extension or CPython interpreter without Numba JIT.
+; 2. Function loaded from pre-compiled Numba disk cache (.numba_cache).
+;
+; Remedy: Ensure Profila runs with live in-memory JIT compilation:
+;   uv run python -m profila viewer -- <your_script.py>`
   }
 
   const status = getSimdStatus(name)

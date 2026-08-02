@@ -13,8 +13,8 @@ enum Colors {
   DARKER_GRAY = '#1E1E1E',
   OFF_BLACK = '#181818',
   BLACK = '#141414',
-  VTUNE_ORANGE = '#E67E22',
-  VTUNE_DARK_ORANGE = '#D35400',
+  PROFILA_ORANGE = '#E67E22',
+  PROFILA_DARK_ORANGE = '#D35400',
   BLUE = '#007ACC',
   PALE_BLUE = '#004E75',
   GREEN = '#2ECC71',
@@ -57,14 +57,14 @@ export const darkTheme: Theme = {
   altBgPrimaryColor: Colors.BLACK,
   altBgSecondaryColor: Colors.DARK_GRAY,
 
-  selectionPrimaryColor: Colors.VTUNE_ORANGE,
-  selectionSecondaryColor: Colors.VTUNE_DARK_ORANGE,
+  selectionPrimaryColor: Colors.PROFILA_ORANGE,
+  selectionSecondaryColor: Colors.PROFILA_DARK_ORANGE,
 
   weightColor: Colors.GREEN,
 
   searchMatchTextColor: Colors.DARKER_GRAY,
-  searchMatchPrimaryColor: Colors.VTUNE_ORANGE,
-  searchMatchSecondaryColor: Colors.VTUNE_DARK_ORANGE,
+  searchMatchPrimaryColor: Colors.PROFILA_ORANGE,
+  searchMatchSecondaryColor: Colors.PROFILA_DARK_ORANGE,
 
   colorForBucket,
   colorForBucketGLSL,
