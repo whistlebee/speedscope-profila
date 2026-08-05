@@ -404,6 +404,24 @@ export class Profile {
   getProfileWithNumbaFrameworkFiltered(): Profile {
     const builder = new StackListProfileBuilder()
     const internalKeywords = [
+      // Standard library & loader machinery
+      'importlib',
+      '_bootstrap',
+      'runpy.py',
+      'contextlib.py',
+      'argparse.py',
+      'codecs.py',
+      'abc.py',
+      'inspect.py',
+      'typing.py',
+      'functools.py',
+      'threading.py',
+      'site.py',
+      'pkgutil.py',
+      '<frozen importlib',
+      '<_frozen_importlib',
+
+      // Numba framework internals
       'compiler.py',
       'typeinfer.py',
       'lowering.py',
@@ -414,9 +432,12 @@ export class Profile {
       'site-packages/numba/',
       'numba/core/',
       'numba/np/',
+      'numba/pycc/',
+      'numba/cuda/',
+      'numba/experimental/',
       '[Numba JIT Overhead',
       '[bad_sample]',
-      'threading.py',
+      '[non_numba]',
     ]
 
     function isNumbaInternal(frame: Frame): boolean {
