@@ -2,6 +2,7 @@ import {h, JSX} from 'preact'
 import {useState} from 'preact/hooks'
 import {StyleSheet, css} from 'aphrodite'
 import {Frame} from '../lib/profile'
+import {profileGroupAtom} from '../app-state'
 import {useTheme, withTheme} from './themes/theme'
 import {FontFamily, FontSize} from './style'
 import {GearIcon, RocketIcon, FolderIcon, BoxIcon} from './icons'
@@ -20,17 +21,24 @@ export function LLVMSideDrawer({selectedFrame, onClose}: LLVMSideDrawerProps): J
   const line = selectedFrame.line
 
   const getLLVMMapItem = (funcName: string) => {
-    const cleanName = funcName.replace(/\s*\(.*\)/, '').trim()
-    const activeProfile = (profileGroupAtom.get()?.profiles?.[0] as any)?.profile
-    const rawProfile = activeProfile?.rawProfile || (window as any).gRawProfile
+    let cleanName = funcName.replace(/\s*\(.*\)/, '').trim()
+    if (cleanName.includes('.')) {
+      const parts = cleanName.split('.')
+      cleanName = parts[parts.length - 1]
+    }
+    const pg = typeof profileGroupAtom !== 'undefined' ? profileGroupAtom.get() : null
+    const activeProfile = (pg?.profiles?.[0] as any)?.profile
+    const rawProfile = (window as any).gRawProfile || activeProfile?.rawProfile || (selectedFrame as any)?.rawProfile
     const map = rawProfile?.shared?.llvm_map
     if (map) {
       if (map[cleanName]) return map[cleanName]
       for (const k of Object.keys(map)) {
-        if (k.toLowerCase() === cleanName.toLowerCase()) return map[k]
+        const cleanKey = k.includes('.') ? k.split('.').pop()! : k
+        if (cleanKey.toLowerCase() === cleanName.toLowerCase()) return map[k]
       }
       for (const k of Object.keys(map)) {
-        if (k.length > 3 && (cleanName.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(cleanName.toLowerCase()))) {
+        const cleanKey = k.includes('.') ? k.split('.').pop()! : k
+        if (cleanKey.length > 3 && (cleanName.toLowerCase().includes(cleanKey.toLowerCase()) || cleanKey.toLowerCase().includes(cleanName.toLowerCase()))) {
           return map[k]
         }
       }

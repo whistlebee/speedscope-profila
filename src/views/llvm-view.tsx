@@ -2,6 +2,7 @@ import {h, JSX} from 'preact'
 import {useState} from 'preact/hooks'
 import {StyleSheet, css} from 'aphrodite'
 import {ActiveProfileState} from '../app-state/active-profile-state'
+import {profileGroupAtom} from '../app-state'
 import {useTheme, withTheme} from './themes/theme'
 import {FontFamily, FontSize} from './style'
 import {GearIcon, RocketIcon, BoxIcon, ZapIcon, FolderIcon} from './icons'
@@ -41,16 +42,22 @@ export function LLVMView({activeProfileState}: LLVMViewProps): JSX.Element {
   const [selectedFrame, setSelectedFrame] = useState(filteredFrames[0] || null)
 
   const getLLVMMapItem = (funcName: string) => {
-    const cleanName = funcName.replace(/\s*\(.*\)/, '').trim()
+    let cleanName = funcName.replace(/\s*\(.*\)/, '').trim()
+    if (cleanName.includes('.')) {
+      const parts = cleanName.split('.')
+      cleanName = parts[parts.length - 1]
+    }
     const rawProfile = (profile as any)?.rawProfile || (window as any).gRawProfile || (profileGroupAtom.get()?.profiles?.[0] as any)?.profile?.rawProfile
     const map = rawProfile?.shared?.llvm_map
     if (map) {
       if (map[cleanName]) return map[cleanName]
       for (const k of Object.keys(map)) {
-        if (k.toLowerCase() === cleanName.toLowerCase()) return map[k]
+        const cleanKey = k.includes('.') ? k.split('.').pop()! : k
+        if (cleanKey.toLowerCase() === cleanName.toLowerCase()) return map[k]
       }
       for (const k of Object.keys(map)) {
-        if (k.length > 3 && (cleanName.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(cleanName.toLowerCase()))) {
+        const cleanKey = k.includes('.') ? k.split('.').pop()! : k
+        if (cleanKey.length > 3 && (cleanName.toLowerCase().includes(cleanKey.toLowerCase()) || cleanKey.toLowerCase().includes(cleanName.toLowerCase()))) {
           return map[k]
         }
       }
