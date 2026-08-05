@@ -63,7 +63,7 @@ export function LLVMSideDrawer({selectedFrame, onClose}: LLVMSideDrawerProps): J
     }
     return {
       enabled: false,
-      text: '⚠️ LLVM IR not recorded in shared.llvm_map',
+      text: 'ℹ️ CPython Interpreter Routine: Executed in Python without @njit compilation',
       instructions: 0,
       simdOps: 0,
       memAlloc: 0,
@@ -77,17 +77,16 @@ export function LLVMSideDrawer({selectedFrame, onClose}: LLVMSideDrawerProps): J
     }
 
     const cleanName = funcName.replace(/\s*\(.*\)/, '').trim()
-    return `; ModuleID = 'numba.compiled.${cleanName}'
+    return `; ModuleID = 'cpython.function.${cleanName}'
 ; Function: ${cleanName}
-; Status: Real LLVM IR not recorded in shared.llvm_map.
+; Status: CPython Host Function (No Numba LLVM IR)
 ;
-; Possible Reasons:
-; 1. Function executed via C/Cython extension or CPython interpreter without Numba JIT.
-; 2. Function loaded from pre-compiled Numba disk cache (.numba_cache).
-; 3. Function is a decorator/wrapper (@njit) or standard library function.
+; Explanation:
+; '${cleanName}' is a standard Python function running in the CPython interpreter.
+; It acts as a host orchestrator that calls JIT compiled Numba helper functions
+; for compute-heavy loops.
 ;
-; Remedy: Ensure Profila runs with live in-memory JIT compilation (--disable-cache):
-;   uv run python -m profila viewer --disable-cache -- <your_script.py>`
+; To inspect LLVM IR disassemblies, select a @njit JIT compiled kernel from the list.`
   }
 
   const status = getSimdStatus(name)
