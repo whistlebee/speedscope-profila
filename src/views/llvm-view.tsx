@@ -18,23 +18,46 @@ export function LLVMView({activeProfileState}: LLVMViewProps): JSX.Element {
   const [sidebarQuery, setSidebarQuery] = useState('')
   const [codeQuery, setCodeQuery] = useState('')
 
+  const rawProfile = (profile as any)?.rawProfile || (window as any).gRawProfile || (profileGroupAtom.get()?.profiles?.[0] as any)?.profile?.rawProfile
+  const llvmMap = rawProfile?.shared?.llvm_map || {}
+
   const frameList: Array<{key: string | number; name: string; file?: string; line?: number}> = []
+  const addedNames = new Set<string>()
+
+  // 1. Add all JIT compiled functions recorded in llvm_map
+  Object.keys(llvmMap).forEach(key => {
+    const item = llvmMap[key]
+    frameList.push({
+      key: key,
+      name: key,
+      file: item.file || 'Numba JIT Compiled Function',
+      line: item.line,
+    })
+    addedNames.add(key.toLowerCase())
+  })
+
+  // 2. Add profile frames that match llvm_map or are user code (excluding stdlib / loader machinery)
+  const ignoredStdlib = ['importlib', '_bootstrap', 'threading.py', 'runpy.py', 'contextlib.py', '<module>']
   profile.forEachFrame(f => {
-    if (f.name && !f.name.includes('[Numba JIT Overhead') && !f.name.includes('[bad_sample]')) {
+    if (!f.name) return
+    const lowerName = f.name.toLowerCase()
+    if (ignoredStdlib.some(ig => lowerName.includes(ig))) return
+
+    const clean = f.name.replace(/\s*\(.*\)/, '').trim()
+    const short = clean.split('.').pop()!
+
+    if (!addedNames.has(clean.toLowerCase()) && !addedNames.has(short.toLowerCase())) {
       frameList.push({
         key: f.key,
         name: f.name,
         file: f.file,
         line: f.line,
       })
+      addedNames.add(clean.toLowerCase())
     }
   })
 
-  const uniqueFrames = Array.from(new Set(frameList.map(f => f.name))).map(name => {
-    return frameList.find(f => f.name === name)!
-  })
-
-  const filteredFrames = uniqueFrames.filter(f =>
+  const filteredFrames = frameList.filter(f =>
     f.name.toLowerCase().includes(sidebarQuery.toLowerCase()) ||
     (f.file && f.file.toLowerCase().includes(sidebarQuery.toLowerCase()))
   )
