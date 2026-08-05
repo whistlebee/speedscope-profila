@@ -37,7 +37,7 @@ export function LLVMView({activeProfileState}: LLVMViewProps): JSX.Element {
   })
 
   // 2. Add profile frames that match llvm_map or are user code (excluding stdlib / loader machinery)
-  const ignoredStdlib = ['importlib', '_bootstrap', 'threading.py', 'runpy.py', 'contextlib.py', '<module>']
+  const ignoredStdlib = ['importlib', '_bootstrap', 'threading.py', 'runpy.py', 'contextlib.py', '<module>', '<lambda>', 'njit']
   profile.forEachFrame(f => {
     if (!f.name) return
     const lowerName = f.name.toLowerCase()
@@ -61,8 +61,6 @@ export function LLVMView({activeProfileState}: LLVMViewProps): JSX.Element {
     f.name.toLowerCase().includes(sidebarQuery.toLowerCase()) ||
     (f.file && f.file.toLowerCase().includes(sidebarQuery.toLowerCase()))
   )
-
-  const [selectedFrame, setSelectedFrame] = useState(filteredFrames[0] || null)
 
   const getLLVMMapItem = (funcName: string) => {
     if (!funcName) return null
@@ -89,6 +87,9 @@ export function LLVMView({activeProfileState}: LLVMViewProps): JSX.Element {
     }
     return null
   }
+
+  const firstWithIR = filteredFrames.find(f => getLLVMMapItem(f.name) != null) || filteredFrames[0] || null
+  const [selectedFrame, setSelectedFrame] = useState(firstWithIR)
 
   const getSimdStatus = (name: string) => {
     const item = getLLVMMapItem(name)
